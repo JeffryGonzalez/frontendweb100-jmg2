@@ -1,3 +1,7 @@
+import { formatName as utilsFormatName, formatName } from "./utils";
+import * as _ from 'lodash';
+
+
 describe('types', () => {
     describe('declaring variables', () => {
         it('using the let keyword', () => {
@@ -160,6 +164,7 @@ line
                     }
                 }
 
+
                 const result = formatName('Han', 'Solo');
                 expect(result.fullName).toBe('Solo, Han');
                 expect(result.length).toBe(9);
@@ -273,4 +278,90 @@ line
             expect(numbers['one'] + numbers['three']).toBe(4)
         });
     });
+
+    describe('function literals', () => {
+
+        it('has a few kinds', () => {
+
+            // Named Function
+            expect(add(2, 2)).toBe(4);
+
+            function add(a: number, b: number): number {
+                return a + b
+            }
+
+
+            // anonymous immediately invoked function expression (IIFE)
+            expect((function (a, b) { return a + b; })(3, 2)).toBe(5);
+
+            type MathOp = (a: number, b: number) => number;
+
+
+            const multiply: MathOp = function (a: number, b: number): number {
+                return a * b;
+            }
+
+            expect(multiply(3, 3)).toBe(9);
+
+            // An Arrow Function
+            const divide: MathOp = (a, b) => a / b;
+
+            expect(divide(10, 2)).toBe(5);
+
+            const divide2: MathOp = (a, b) => {
+                console.log(`About to divide a: ${a} b: ${b} `);
+                return a / b;
+            }
+            expect(divide2(20, 10)).toBe(2);
+        });
+
+        it('an example of a higher order function', () => {
+
+            // Any function that takes as an argument one or more functions
+            // And/or returns a function
+
+
+            const result = utilsFormatName('Han', 'Solo');
+            expect(result).toBe('Solo, Han');
+
+
+            expect(utilsFormatName('Han', 'Solo', (h) => h.toUpperCase()))
+                .toBe('SOLO, HAN');
+
+            function decorate(what: string): string {
+                return `***${what}***`;
+            }
+
+            expect(utilsFormatName('Han', 'Solo', decorate)).toBe('***Solo, Han***');
+        });
+
+        it('another example - a function that returns a function', () => {
+
+            function makeAdder(a: number): (b: number) => number {
+                return (b) => a + b;
+            }
+
+            const add12 = makeAdder(12);
+            const add100 = makeAdder(100);
+
+            expect(add12(12)).toBe(24);
+            expect(add100(8)).toBe(108);
+
+        });
+        it('using the curry function from lodash', () => {
+
+            function add(a: number, b: number): number {
+                return a + b;
+            }
+
+            // expect(_.curry(add)(1)(2)).toBe(3);
+
+            const add20 = _.curry(add)(20);
+            const add100 = _.curry(add)(100);
+
+            expect(add20(5)).toBe(25);
+            expect(add100(50)).toBe(150);
+        });
+    });
+
 });
